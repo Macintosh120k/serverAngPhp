@@ -11,27 +11,19 @@ $params = json_decode($json);
 $pdo = new Conexion();
 if ($_SERVER['REQUEST_METHOD'] == 'GET') {
     if (isset($_GET['id'])) {
-        // $sql = $pdo->prepare('SELECT idAlumno, nombres,
-        // apellidoPaterno,
-        // apellidoMaterno,
-        // direccion,
-        // telefono,
-        // ubigeo,
-        // fechaIngreso FROM alumno WHERE idAlumno = :id');
-
         $sql = $pdo->prepare('SELECT idAlumno, nombres,
         apellidoPaterno,
         apellidoMaterno,
         direccion,
         telefono,
         ubigeo,
-        fechaIngreso,img FROM alumno WHERE idAlumno = :id');
+        fechaIngreso,img,nombreImg FROM alumno WHERE idAlumno = :id');
 
         $sql->bindValue(':id', $_GET['id']);
         $sql->execute();
 
         $content = array();
-        while($row = $sql->fetch(PDO::FETCH_BOTH)){
+        while ($row = $sql->fetch(PDO::FETCH_BOTH)) {
             $content[] = array(
                 'idAlumno' => $row['idAlumno'],
                 'nombres' => $row['nombres'],
@@ -41,7 +33,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'GET') {
                 'telefono' => $row['telefono'],
                 'ubigeo' => $row['ubigeo'],
                 'fechaIngreso' => $row['fechaIngreso'],
-                'img' => 'data:image/png;base64,'. base64_encode($row['img']),
+                'img' => 'data:image/png;base64,' . base64_encode($row['img']),
+                'nombreImg' => $row['nombreImg'],
             );
         }
 
@@ -87,7 +80,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'GET') {
         }
         $sql->execute();
         $sql->setFetchMode(PDO::FETCH_ASSOC);
-    
+
         header('HTTP/1.1 200 OK');
         echo json_encode($sql->fetchAll());
     }
@@ -101,15 +94,18 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $id = $sql->fetchAll();
     $newiD = $id[0]['last_id'] + 1;
     //
-    
+
     $formData = json_decode($_POST['dataForm']);
-    $foto = file_get_contents($_FILES['file']['tmp_name']);
     $requiredParam = array();
     foreach ($formData as $key => $valor) {
         if (strlen($valor) == 0) {
             if ($key == 'nombres' || $key == 'apellidoPaterno' || $key == 'apellidoMaterno')
                 $requiredParam[] = $key . ' es Requerido';
         }
+    }
+    $foto = null;
+    if (isset($_FILES['file']['tmp_name'])) {
+        $foto = file_get_contents($_FILES['file']['tmp_name']);
     }
     if (count($requiredParam) > 0) {
         echo json_encode($requiredParam);

@@ -17,7 +17,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'GET') {
         telefono,
         direccion,
         especialidad,
-        fechaRegistro,img FROM personal WHERE idPersonal = :id');
+        fechaRegistro,img,nombreImg FROM personal WHERE idPersonal = :id');
 
         $sql->bindValue(':id', $_GET['id']);
         $sql->execute();
@@ -34,6 +34,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'GET') {
                 'especialidad' => $row['especialidad'],
                 'fechaRegistro' => $row['fechaRegistro'],
                 'img' => 'data:image/png;base64,'. base64_encode($row['img']),
+                'nombreImg' => $row['nombreImg'],
             );
         }
 
@@ -112,7 +113,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     }
     $foto = null;
     if(isset($_FILES['file']['tmp_name'])){
-        print_r($_FILES['file']['tmp_name']);
         $foto = file_get_contents($_FILES['file']['tmp_name']);
     }
     if (count($requiredParam) > 0) {

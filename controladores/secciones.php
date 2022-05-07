@@ -51,15 +51,28 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $id = $sql->fetchAll();
     $newiD = $id[0]['last_id'] + 1;
     //
-    $sql = 'INSERT INTO seccion (idSeccion,nombreSeccion) VALUES (:idSeccion, :nombreSeccion)';
-    $stmt = $pdo->prepare($sql);
-    $stmt->bindValue(':idSeccion', $newiD);
-    $stmt->bindValue(':nombreSeccion', $params->nombreSeccion);
-    $stmt->execute();
+    $requiredParam = array();
+    foreach ($params as $key => $valor) {
+        if (strlen($valor) == 0) {
+            if ($key == 'nombreSeccion')
+                $requiredParam[] = $key . ' es Requerido';
+        }
+    }
+    if (count($requiredParam) > 0) {
+        echo json_encode($requiredParam);
+        header('HTTP/10.4 Client Error 4xx');
+        exit;
+    } else {
+        $sql = 'INSERT INTO seccion (idSeccion,nombreSeccion) VALUES (:idSeccion, :nombreSeccion)';
+        $stmt = $pdo->prepare($sql);
+        $stmt->bindValue(':idSeccion', $newiD);
+        $stmt->bindValue(':nombreSeccion', $params->nombreSeccion);
+        $stmt->execute();
 
-    header('HTTP/1.1 200 OK');
-    echo json_encode('Registro Insertado...!');
-    exit;
+        header('HTTP/1.1 200 OK');
+        echo json_encode('Registro Insertado...!');
+        exit;
+    }
 }
 //EDITAR
 if ($_SERVER['REQUEST_METHOD'] == 'PUT') {

@@ -6,17 +6,29 @@ header("Access-Control-Allow-Headers: X-API-KEY, Origin, X-Requested-With, Conte
 header("Access-Control-Allow-Methods: GET, POST, OPTIONS, PUT, DELETE");
 header("Allow: GET, POST, OPTIONS, PUT, DELETE");
 $pdo = new Conexion();
-$id = json_decode($_POST['id']);
-$foto = file_get_contents($_FILES['file']['tmp_name']);
-
-$sql = 'UPDATE alumno SET img = :img
-WHERE idAlumno=:idAlumno';
-
-$stmt = $pdo->prepare($sql);
-$stmt->bindValue(':idAlumno', $id);
-$stmt->bindValue(':img', $foto);
-$stmt->execute();
-
-header('HTTP/1.1 200 OK');
-echo json_encode('Registro Actualizado...!');
+$foto = null;
+if (isset($_FILES['file']['tmp_name'])) {
+    $foto = file_get_contents($_FILES['file']['tmp_name']);
+}
+$params = json_decode($_POST['data']);
+if ($params->table == 'personal') {
+    $sql = 'UPDATE ' . $params->table . ' SET img = :img,nombreImg = :nombreImg WHERE idPersonal=:idPersonal';
+    $stmt = $pdo->prepare($sql);
+    $stmt->bindValue(':idPersonal', $params->id);
+    $stmt->bindValue(':img', $foto);
+    $stmt->bindValue(':nombreImg', $params->nombreImg);
+    $stmt->execute();
+    header('HTTP/1.1 200 OK');
+    echo json_encode('Registro Actualizado...!');
+}
+if ($params->table == 'alumno') {
+    $sql = 'UPDATE ' . $params->table . ' SET img = :img,nombreImg = :nombreImg WHERE idAlumno=:idAlumno';
+    $stmt = $pdo->prepare($sql);
+    $stmt->bindValue(':idAlumno', $params->id);
+    $stmt->bindValue(':img', $foto);
+    $stmt->bindValue(':nombreImg', $params->nombreImg);
+    $stmt->execute();
+    header('HTTP/1.1 200 OK');
+    echo json_encode('Registro Actualizado...!');
+}
 exit;
